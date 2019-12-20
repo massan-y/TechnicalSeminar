@@ -21,30 +21,37 @@ public class UtilCommon extends Application {
     }
 
     public static Context getAppContext(){
+
         return UtilCommon.context;
     }
 
     public String getSignalingServerIP() {
+
         return signalingServerIP;
     }
 
     public int getSignalingServerPort() {
+
         return signalingServerPort;
     }
 
-    public String getStunServerIP() {
+    public String getStunServerIP()
+    {
         return stunServerIP;
     }
 
     public int getStunServerPort() {
+
         return stunServerPort;
     }
 
     public String getPeerId() {
+
         return peerId;
     }
 
     public void setSignalingServerIP(String signalingServerIP) {
+
         this.signalingServerIP = signalingServerIP;
     }
 
@@ -53,14 +60,17 @@ public class UtilCommon extends Application {
     }
 
     public void setStunServerIP(String stunServerIP) {
+
         this.stunServerIP = stunServerIP;
     }
 
     public void setStunServerPort(int stunServerPort) {
+
         this.stunServerPort = stunServerPort;
     }
 
     public void setPeerId(String peerId) {
+
         this.peerId = peerId;
     }
 }
