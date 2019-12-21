@@ -42,6 +42,8 @@ public class STUNServerClientSender extends AsyncTask<String, String, Integer> {
                 socket.send(sendPacket);
                 if(sendMsg.equals("Hello")){
                     sendMsg = "Ping";
+
+                    //レシーバーを並列に別スレッドで実行する
                     istunServerClientSender.onSendFinishMsgToStun();
                 }
                 sleep();
