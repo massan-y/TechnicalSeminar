@@ -3,7 +3,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 public class MainSignaling implements IReceive{
-    private final static int myPort = 55555;
+    private final static int myPort = 17053;
     private ArrayList<UserInfo> userInfos;
     private DatagramSocket socket;
 

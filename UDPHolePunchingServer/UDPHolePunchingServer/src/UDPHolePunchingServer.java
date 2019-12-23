@@ -10,7 +10,7 @@ import java.net.SocketException;
  */
 
 public class UDPHolePunchingServer extends Thread implements UDPHolePunchingServerReceiveListener,UDPHolePunchingServerSendListener{
-    final static int SERVER_PORT = 55554;
+    final static int SERVER_PORT = 17053;
     private DatagramSocket serverSocket;
     private UDPHolePanchingFinishListener udpHolePanchingFinishListener;
     UDPHolePunchingServer(UDPHolePanchingFinishListener udpHolePanchingFinishListener){

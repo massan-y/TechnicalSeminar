@@ -132,9 +132,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (R.id.start == v.getId()) {
             utilCommon.setSignalingServerIP("192.168.11.19"); //serverIPアドレス
-            utilCommon.setSignalingServerPort(45555); //serverPort番号
+            utilCommon.setSignalingServerPort(17053); //serverPort番号
             utilCommon.setStunServerIP("192.168.11.19"); //serverIPアドレス
-            utilCommon.setStunServerPort(55554); //serverPort番号
+            utilCommon.setStunServerPort(17053); //serverPort番号
             utilCommon.setPeerId(peerId.getText().toString());
             peerId.setVisibility(View.INVISIBLE);
             start.setVisibility(View.INVISIBLE);
