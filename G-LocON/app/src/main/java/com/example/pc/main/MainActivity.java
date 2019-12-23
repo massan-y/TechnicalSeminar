@@ -125,13 +125,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * STUNサーバに接続するトリガーとする
      *
      * @param v
+     *
+     *
      */
     @Override
     public void onClick(View v) {
         if (R.id.start == v.getId()) {
-            utilCommon.setSignalingServerIP("192.168.0.23"); //serverIPアドレス
+            utilCommon.setSignalingServerIP("192.168.11.19"); //serverIPアドレス
             utilCommon.setSignalingServerPort(45555); //serverPort番号
-            utilCommon.setStunServerIP("192.168.0.23"); //serverIPアドレス
+            utilCommon.setStunServerIP("192.168.11.19"); //serverIPアドレス
             utilCommon.setStunServerPort(55554); //serverPort番号
             utilCommon.setPeerId(peerId.getText().toString());
             peerId.setVisibility(View.INVISIBLE);
@@ -195,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         myUserInfo.setPrivatePort(socket.getLocalPort());
         myUserInfo.setPeerId(utilCommon.getPeerId());
         myUserInfo.setSpeed(nowSpeed);
-        myUserInfo.setPeerId(utilCommon.getPeerId());
+        //myUserInfo.setPeerId(utilCommon.getPeerId());
 
         p2p = new P2P(socket, myUserInfo, this);
         natTravel = NAT_TRAVEL_OK;
@@ -370,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * マップ上のマーカの制御を行う（マーカの追加，更新，削除）
      *
      * @param userInfo            マーカ位置の更新を行う通信相手情報
-     * @param peripheralUserInfos 現在の周辺ユーザ数
+     * @param peripheralUserInfos 現在の周辺ユーザの情報
      */
     synchronized public void arrangeMarker(final UserInfo userInfo, final ArrayList<UserInfo> peripheralUserInfos) {
         //周りの情報のマーカーの設定をしている
@@ -428,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         for (int i = 0; i < markerList.size(); i++) {
             final int tmp = i;
             if (markerList.get(i).getPeerId().equals(userInfo.getPeerId())) {
+                //既定値よりも速度が早い場合は赤色のマーカーを設置
                 if (userInfo.getSpeed() - myUserInfo.getSpeed() > TOLERANCE_SPEED) {
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -435,6 +438,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                         }
                     });
+                    //既定値以内の差であるときは緑のマーカーを設置
                 } else {
                     runOnUiThread(new Runnable() {
                         public void run() {

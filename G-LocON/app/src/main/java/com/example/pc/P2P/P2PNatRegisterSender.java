@@ -60,6 +60,7 @@ public class P2PNatRegisterSender extends AsyncTask<String, String, Integer> {
 
         switch(eP2PProcess) {
             case NATRegisterDstUsers:
+
                 for (int i = 0; i < peripheralUsers.size(); i++) {
                     DatagramPacket sendPacket;
                     //同NAT内に存在する端末の場合はプライベートIPとPORTを指定する

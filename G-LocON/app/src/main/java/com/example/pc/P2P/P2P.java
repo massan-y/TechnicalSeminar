@@ -216,8 +216,10 @@ public class P2P implements IP2PReceiver {
      * データをcsvに記録するためにフィールを設定
      */
     public void setUpMemory() {
+        //synchronizedListは別スレッドと同期するリスト（？）
         sendMemory = Collections.synchronizedList(new ArrayList<MemoryToSendData>());
         receiveMemory = Collections.synchronizedList(new ArrayList<MemoryToReceiveData>());
+
         sendFileInput = new OutputToCSV("/send.csv");//データ計測のファイル名
         String[] fieldName = {"LocationUpdateCount", "endPointIP", "endPointPort", "sendTime"};//CSVファイルのフィールド
         sendFileInput.setFieledName(fieldName);

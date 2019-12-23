@@ -36,9 +36,8 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
         final String SEND_DATA = "SendLocation";
         final String ACK = "Ack";
         DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
         do {
-
-
                 Log.d("P2P", "P2Pレシーブ起動直前");
                 try{
                 socket.receive(receivePacket);
@@ -54,6 +53,7 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
                 //Log.d("Receive","送信元IP:"+receivePacket.getAddress());
 
 
+                //上の行で取得したプロセスタイプで識別している　　送信するときはsendlocationになっている
                 if(processType.equals(GET_PERIPHERAL_USER)){
                     iP2PReceiver.onGetPeripheralUser(signalingJSONObject.getPerioheralUsers());
                 }
@@ -62,7 +62,6 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
                     iP2PReceiver.onDoUDPHolePunching(signalingJSONObject.getSrcUser());
                 }
 
-                //プロセスタイプで識別している　　送信するときはsendlocationになっている
                 else if(processType.equals(SEND_DATA)){
                     P2PJSONObject p2pJSONObject = new P2PJSONObject(jsonObject);
                         Log.d("Receive", "送信元:" + receivePacket.getAddress());
