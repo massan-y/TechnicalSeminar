@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         start.setOnClickListener(this);
 
 
+
         createDatagramSocket();
         utilCommon = (UtilCommon) getApplication();
         myUserInfo = new UserInfo();
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .findFragmentById(R.id.mapFragment);
 
         mapFragment.getMapAsync(this);
+
+
     }
 
 
