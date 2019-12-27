@@ -1,6 +1,8 @@
 package com.example.pc.main;
 
 
+import android.app.Instrumentation;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +37,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import android.content.*;
 
 
 /**
@@ -45,8 +48,7 @@ import java.util.List;
  * v2vの基本形
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener, OnMapReadyCallback, ISTUNServerClient, IP2P {
-    private EditText peerId;
-    private Button start;
+    private String peerId;
     private Button end;
     private Button plus;
     private Button minus;
@@ -77,11 +79,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     final private int ADD_MARKER_PROGRESS = 1;
     final private int NOT_ADD_MARKER_PROGRESS = 0;
     private P2P p2p;
+    private static final int InputActivity = 100;
+    private static String message;
+    private static String position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = new Intent(MainActivity.this,InputActivity.class);
+        startActivityForResult(intent,InputActivity);
+
 
         end = (Button) findViewById(R.id.end);
         plus = (Button)findViewById(R.id.plus);
@@ -89,9 +98,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         angle = (Button)findViewById(R.id.angle);
         end.setOnClickListener(this);
         end.setVisibility(View.INVISIBLE);
-        peerId = (EditText) findViewById(R.id.peerId);
-        start = (Button) findViewById(R.id.start);
-        start.setOnClickListener(this);
 
 
 
@@ -108,6 +114,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mapFragment.getMapAsync(this);
 
 
+    }
+
+    /*
+     *InputActivityから返ってきたデータを受け取る
+     * InputActivityから帰ってきたときに諸々の設定を行う
+     * G-LockONでのスタートボタンの機能を兼ねている
+     */
+
+    @Override
+    protected void onActivityResult(int requestCode , int resultCode ,Intent data){
+      if(requestCode == InputActivity)
+          if(resultCode == RESULT_OK) {
+              //InputActivityでの入力内容を受け取る
+              message = data.getStringExtra("inputData");
+              String[] result = message.split("/",0);
+              position = result[0];
+              peerId = result[1];
+              Toast.makeText(this,peerId,Toast.LENGTH_LONG).show();
+
+              utilCommon.setSignalingServerIP("118.86.27.178"); //serverIPアドレス
+              utilCommon.setSignalingServerPort(17053); //serverPort番号
+              utilCommon.setStunServerIP("118.86.27.178"); //serverIPアドレス
+              utilCommon.setStunServerPort(17053); //serverPort番号
+              utilCommon.setPeerId(peerId);
+              end.setVisibility(View.VISIBLE);
+
+              plus.setOnClickListener(this);
+              minus.setOnClickListener(this);
+              angle.setOnClickListener(this);
+
+              mLocation = new Location("");
+              mLocation.setLatitude(35.951003);
+              mLocation.setLongitude(139.655367);
+
+
+              STUNServerClient stunServerClient = new STUNServerClient(socket, this);
+              stunServerClient.stunServerClientStart();
+
+          }
     }
 
 
@@ -133,30 +178,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onClick(View v) {
-        if (R.id.start == v.getId()) {
-            utilCommon.setSignalingServerIP("118.86.27.178"); //serverIPアドレス
-            utilCommon.setSignalingServerPort(17053); //serverPort番号
-            utilCommon.setStunServerIP("118.86.27.178"); //serverIPアドレス
-            utilCommon.setStunServerPort(17053); //serverPort番号
-            utilCommon.setPeerId(peerId.getText().toString());
-            peerId.setVisibility(View.INVISIBLE);
-            start.setVisibility(View.INVISIBLE);
-            end.setVisibility(View.VISIBLE);
 
-            plus.setOnClickListener(this);
-            minus.setOnClickListener(this);
-            angle.setOnClickListener(this);
-
-            mLocation = new Location("");
-            mLocation.setLatitude(35.951003);
-            mLocation.setLongitude(139.655367);
-
-
-            STUNServerClient stunServerClient = new STUNServerClient(socket, this);
-            stunServerClient.stunServerClientStart();
-        }
-
-        else if (R.id.end == v.getId()) {
+         if (R.id.end == v.getId()) {
             p2p.fileInputMemoryResult();
             p2p.fileInputMemorySendData();
             p2p.fileInputMemoryReceiveData();
@@ -219,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         try {
             mMap.setMyLocationEnabled(true);
         } catch (SecurityException e) {

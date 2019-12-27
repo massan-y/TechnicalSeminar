@@ -9,47 +9,14 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="396dp"
-        android:layout_height="443dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="5dp"
+        android:layout_width="433dp"
+        android:layout_height="902dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
-
-    <EditText
-        android:id="@+id/peerId"
-        android:layout_width="218dp"
-        android:layout_height="47dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:ems="10"
-        android:hint="edit peerId"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/mapFragment"
-        app:layout_constraintTop_toBottomOf="@+id/mapFragment"
-        app:layout_constraintVertical_bias="0.015" />
-
-    <Button
-        android:id="@+id/start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="start"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.478"
-        app:layout_constraintStart_toEndOf="@+id/peerId"
-        app:layout_constraintTop_toBottomOf="@+id/mapFragment"
-        app:layout_constraintVertical_bias="0.015" />
 
     <Button
         android:id="@+id/end"
