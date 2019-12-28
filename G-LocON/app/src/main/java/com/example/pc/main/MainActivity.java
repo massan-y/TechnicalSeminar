@@ -1,16 +1,16 @@
 package com.example.pc.main;
 
 
-import android.app.Instrumentation;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.pc.P2P.IP2P;
@@ -37,7 +37,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import android.content.*;
 
 
 /**
@@ -60,10 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<MarkerInfo> markerList;
     private Circle circle = null; //通信範囲
     final static private double TOLERANCE_SPEED = 7; //速度差
-    private float cameraLevel = 18.0f;
+    private float cameraLevel = 19.0f;
     final static private String HEAD_UP= "HEAD_UP";
     final static private String NORTH_UP= "NORTH_UP";
-    private String cameraAngle = HEAD_UP;
+    private String cameraAngle = NORTH_UP;
 
 
     UtilCommon utilCommon; //サーバのグローバルIP等の共通データ
@@ -74,14 +73,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     final private static int USER_INFO_UPDATE_INTERVAL = 5; //シグナリングサーバに接続する頻度（位置情報を5回取得毎）
     private int geoUpdateCount = 4; //USER_INFO_UPDATE_INTERVALに対応
     private int totalGeoUpdateCount = 0; //位置情報の更新回数
-    private double searchRange = 50; //m単位 これが検索範囲になっている
+    private static double searchRange = 40; //m単位 これが検索範囲になっている
     private int addMarker = 0;
     final private int ADD_MARKER_PROGRESS = 1;
     final private int NOT_ADD_MARKER_PROGRESS = 0;
     private P2P p2p;
     private static final int InputActivity = 100;
-    private static String message;
-    private static String position;
+    private static String position; //逃走者かハンターかを記憶する変数
+    private static String japPosition; //positionの日本語を記憶する変数
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,15 +90,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(MainActivity.this,InputActivity.class);
         startActivityForResult(intent,InputActivity);
 
-
         end = (Button) findViewById(R.id.end);
         plus = (Button)findViewById(R.id.plus);
         minus = (Button)findViewById(R.id.minus);
         angle = (Button)findViewById(R.id.angle);
         end.setOnClickListener(this);
         end.setVisibility(View.INVISIBLE);
-
-
 
         createDatagramSocket();
         utilCommon = (UtilCommon) getApplication();
@@ -127,11 +123,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
       if(requestCode == InputActivity)
           if(resultCode == RESULT_OK) {
               //InputActivityでの入力内容を受け取る
-              message = data.getStringExtra("inputData");
+              String message = data.getStringExtra("inputData");
               String[] result = message.split("/",0);
               position = result[0];
               peerId = result[1];
-              Toast.makeText(this,peerId,Toast.LENGTH_LONG).show();
+
+              //ダイアログに表示するため日本語も記憶しておく
+              if(position.equals("hunter")) {
+                  japPosition = "ハンター";
+                  searchRange = 30;
+                  cameraLevel = 20.0f;
+              }
+              else japPosition = "逃走者";
+
+              Log.d("position",japPosition);
 
               utilCommon.setSignalingServerIP("118.86.27.178"); //serverIPアドレス
               utilCommon.setSignalingServerPort(17053); //serverPort番号
@@ -147,6 +152,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               mLocation = new Location("");
               mLocation.setLatitude(35.951003);
               mLocation.setLongitude(139.655367);
+
+              //アラートダイアログの設定
+              AlertDialog.Builder builder = new AlertDialog.Builder(this);
+              builder.setTitle("確認事項1");
+              builder.setMessage(peerId+"さん\n"+"あなたは"+japPosition+"です");
+              builder.setPositiveButton("next", new DialogInterface.OnClickListener() {
+                  @Override
+                  public void onClick(DialogInterface dialog, int which) {
+
+                      //2ページ目を表示　　もしかしたらもっとうまいやり方があるかもしれない
+                      AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                      builder.setTitle("確認事項2");
+                      if(position.equals("hunter"))
+                          builder.setMessage(searchRange+"m以内にいる逃走者が緑色のマーカーで表示されます。\n");
+                      else
+                          builder.setMessage(searchRange+"m以内にいる逃走者が緑色," +
+                                  "ハンターが赤色のマーカーで表示されます。\n");
+
+                      builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+
+                          }
+                      });
+                      builder.show();
+                  }
+              });
+              builder.show();
 
 
               STUNServerClient stunServerClient = new STUNServerClient(socket, this);

@@ -9,8 +9,8 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="433dp"
-        android:layout_height="902dp"
+        android:layout_width="411dp"
+        android:layout_height="661dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

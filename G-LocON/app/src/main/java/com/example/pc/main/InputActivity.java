@@ -31,7 +31,7 @@ public class InputActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int checkRadio = radio.getCheckedRadioButtonId();
                 //ラジオグループの値を取得
-               // RadioButton radioButton = findViewById(checkRadio);
+                RadioButton radioButton = findViewById(checkRadio);
 
                 if(checkRadio == -1) {
                     //ラジオボタンの入力の要求をtoastで表示
@@ -42,13 +42,17 @@ public class InputActivity extends AppCompatActivity {
                     //IDの入力要求をtoastで表示
                     Toast.makeText(InputActivity.this,"IDを入力してください！",Toast.LENGTH_LONG).show();
 
+
+                //2つとも入力済み
                 else{
+
                     String radioMsg;
 
                     if(checkRadio == R.id.hunter)
                         radioMsg = "hunter";
                     else
                         radioMsg = "fugitive";
+
 
                     String str = null;
                     //apiが足りないとjoinメソッドが呼べないらしい
