@@ -3,7 +3,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 public class MainSignaling implements IReceive{
-    private final static int myPort = 17053;
+    private final static int myPort = 44444;
     private ArrayList<UserInfo> userInfos;
     private DatagramSocket socket;
 
@@ -38,7 +38,7 @@ public class MainSignaling implements IReceive{
     @Override
     public void onRegister(UserInfo userInfo){
         userInfos.add(userInfo);
-        //System.out.println("REGISTER:現在のuserInfosのサイズ"+userInfos.size());
+        System.out.println("REGISTER:現在のuserInfosのサイズ"+userInfos.size());
     }
 
     /**

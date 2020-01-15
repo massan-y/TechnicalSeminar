@@ -1,5 +1,6 @@
 package com.example.pc.P2P;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.pc.main.UserInfo;
 import com.example.pc.main.UtilCommon;
@@ -66,6 +67,7 @@ public class Signaling extends AsyncTask<String, String, Integer> {
             case UPDATE:
                 jsonObject = signalingJSONObject.covUserInfoForUpdate(userInfo);
                 try {
+                    Log.d("P2P", "send search");
                     byte[] sendData = jsonObject.toString().getBytes();
                     DatagramPacket sendPacket;
                     sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(utilCommon.getSignalingServerIP()), utilCommon.getSignalingServerPort());

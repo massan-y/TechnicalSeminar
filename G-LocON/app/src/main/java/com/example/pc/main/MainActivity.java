@@ -87,9 +87,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // InputActivityを開始
         Intent intent = new Intent(MainActivity.this,InputActivity.class);
         startActivityForResult(intent,InputActivity);
 
+        // ボタンの設定
         end = (Button) findViewById(R.id.end);
         plus = (Button)findViewById(R.id.plus);
         minus = (Button)findViewById(R.id.minus);
@@ -112,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    /*
-     *InputActivityから返ってきたデータを受け取る
+    /**
+     * InputActivityから返ってきたデータを受け取る
      * InputActivityから帰ってきたときに諸々の設定を行う
      * G-LockONでのスタートボタンの機能を兼ねている
      */
@@ -138,10 +140,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
               Log.d("position",japPosition);
 
-              utilCommon.setSignalingServerIP("118.86.27.178"); //serverIPアドレス
-              utilCommon.setSignalingServerPort(17053); //serverPort番号
-              utilCommon.setStunServerIP("118.86.27.178"); //serverIPアドレス
-              utilCommon.setStunServerPort(17053); //serverPort番号
+              utilCommon.setSignalingServerIP("220.108.194.125"); //serverIPアドレス
+              utilCommon.setSignalingServerPort(45555); //serverPort番号
+              utilCommon.setStunServerIP("220.108.194.125"); //serverIPアドレス
+              utilCommon.setStunServerPort(45554); //serverPort番号
               utilCommon.setPeerId(peerId);
               end.setVisibility(View.VISIBLE);
 
@@ -181,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               });
               builder.show();
 
-
+              // STUNサーバとの通信開始
               STUNServerClient stunServerClient = new STUNServerClient(socket, this);
               stunServerClient.stunServerClientStart();
 

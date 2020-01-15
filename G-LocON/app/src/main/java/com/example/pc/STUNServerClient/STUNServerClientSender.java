@@ -33,6 +33,7 @@ public class STUNServerClientSender extends AsyncTask<String, String, Integer> {
         UtilCommon utilCommon = (UtilCommon)UtilCommon.getAppContext();
         String stunServerIP = utilCommon.getStunServerIP();
         int stunServerPort = utilCommon.getStunServerPort();
+
         while(true) {
             try {
                 byte[] sendData = sendMsg.getBytes();

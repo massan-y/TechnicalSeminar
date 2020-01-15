@@ -52,6 +52,7 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
                 String processType = signalingJSONObject.getProcessType();
                 //Log.d("Receive","送信元IP:"+receivePacket.getAddress());
 
+                Log.d("P2P", "processType " + processType);
 
                 //上の行で取得したプロセスタイプで識別している　　送信するときはsendlocationになっている
                 if(processType.equals(GET_PERIPHERAL_USER)){
