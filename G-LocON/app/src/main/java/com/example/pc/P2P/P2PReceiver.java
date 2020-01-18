@@ -54,7 +54,7 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
 
                 Log.d("P2P", "processType " + processType);
 
-                //上の行で取得したプロセスタイプで識別している　　送信するときはsendlocationになっている
+                //上の行で取得したプロセスタイプで識別している　　
                 if(processType.equals(GET_PERIPHERAL_USER)){
                     iP2PReceiver.onGetPeripheralUser(signalingJSONObject.getPerioheralUsers());
                 }
@@ -63,6 +63,8 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
                     iP2PReceiver.onDoUDPHolePunching(signalingJSONObject.getSrcUser());
                 }
 
+                // sendLocationのときは一つの情報が送られてくる
+                // 詳しくはP2PSenderクラスを参照
                 else if(processType.equals(SEND_DATA)){
                     P2PJSONObject p2pJSONObject = new P2PJSONObject(jsonObject);
                         Log.d("Receive", "送信元:" + receivePacket.getAddress());

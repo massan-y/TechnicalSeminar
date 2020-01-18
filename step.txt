@@ -31,7 +31,7 @@ privatePortはDatagramSocketクラス（main内ではsocketというインスタ
 P2P
 9.
 P2Pクラスのインスタンスの生成
-setUpMemory()を呼び出し、CSVに出力するための設定を行う
+コンストラクタ内でsetUpMemory()を呼び出し、CSVに出力するための設定を行う
 
 10.
 receiverの並列開始
@@ -58,11 +58,20 @@ getPerioheralUsers()内では一人ずつUserInfo型のオブジェクトを作�
 
 3.
 onGetPerioheralUser()からonGetPeripheralUsersInfo()を呼び出し、arrangeMarker()を呼ぶ
+このとき、第一引数はnullでメソッドを呼び出している
 
 4.
-マーカーの更新を行う
+最初のif文で現在登録されているマーカーリストと現在の周辺ユーザの比較を行う
+マーカーリストに登録されているユーザーが現在の周辺ユーザーに入っていたらcontinueMarkerに追加、見つからなければremoveMarkerに追加する
 
 5.
+周辺に居るユーザの数が0のときはマーカーリストの内容をすべて削除し、0でないときはremoveMarkerの人だけ削除し、markerListにcontinueMarkerを上書きする→return
+
+6.
+P2PNatRegisterSenderのコンストラクタを呼び出し、自分のパブリクIP,Port、ソケット、周辺ユーザの情報、プロセスタイプを渡す
+このときのプロセスタイプはNATRegisterDstUsersになっている
+
+7.
  natRegisterDstUsers()を呼び出す
 対象のユーザが自分と同一IP→同一NATに存在するためプライベートIP,Portでやり取りをする
 対象のユーザが異なるIP→異なるNATに存在する端末の場合はパブリックIP、Portを使ってNAT通過
@@ -71,6 +80,36 @@ onGetPerioheralUser()からonGetPeripheralUsersInfo()を呼び出し、arrangeMa
 
 
 DO_UDP_HOLE_PUNCHING：
-1.getSrcUser()で
+1.
+getSrcUser()で自身を検索したユーザのパブリック、プライベートIP,Portの登録を行い、登録したUserInfo型のオブジェクトをreturnする
+
+2.
+このユーザが周辺ユーザのリストに登録されているか確認し、されていない場合は新たに追加する
 
 
+
+SEND_DATA
+1.
+P2PJSONObject型のコンストラクタを呼び出し、受け取ったJSONオブジェクトのいち情報を読み取る
+
+2.
+１で読み取った情報等をonGetPeripheralUserLocation()に渡す
+＊parmはP2Pクラス内のドキュメント参照
+
+3.
+自分が保存している周辺ユーザの情報と比較し、通信相手の情報が登録されているか確認する
+このときパブリック、プライベートの両方と比較する
+
+4.
+位置情報、peerID、スピードを上書きし、sendAck()を呼び出す
+
+5.
+SendAck型のコンストラクタを呼び出し、並列処理を開始する
+
+6.
+プロセスタイプをAckとしたJSONオブジェクトに受け取ったlocationCountを追加し、送信する
+
+
+ACK
+1.
+受け取った情報をCSVで保存

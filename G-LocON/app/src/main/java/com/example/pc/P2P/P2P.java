@@ -177,6 +177,7 @@ public class P2P implements IP2PReceiver {
 
        //自分が保持している周りのユーザ情報→ peripheralUsers　　　IPアドレスとポート番号が同じか確認
         for (int i = 0; i < peripheralUsers.size(); i++) {
+            // パブリックIP,Portで比較
             if (srcIP.equals(peripheralUsers.get(i).getPublicIP()) && srcPort == peripheralUsers.get(i).getPublicPort()) {
                 peripheralUsers.get(i).setLatitude(location.getLatitude());
                 peripheralUsers.get(i).setLongitude(location.getLongitude());
@@ -186,6 +187,7 @@ public class P2P implements IP2PReceiver {
                 iP2P.onGetDetailUserInfo(peripheralUsers.get(i), peripheralUsers);
                 return;
             }
+            // プライベートIP,Portで比較
             if (srcIP.equals(peripheralUsers.get(i).getPrivateIP()) && srcPort == peripheralUsers.get(i).getPrivatePort()) {
                 peripheralUsers.get(i).setLatitude(location.getLatitude());
                 peripheralUsers.get(i).setLongitude(location.getLongitude());
