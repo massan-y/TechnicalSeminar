@@ -170,10 +170,10 @@ public class P2P implements IP2PReceiver {
      * @param srcPort             通信相手のポート
      * @param location            相手の位置情報
      * @param peerId              相手のIPアドレス
-     * @param speed               相手の速度
+     * @param position            相手のposition
      */
     @Override
-    public void onGetPeripheralUserLocation(int locationUpdateCount, String srcIP, int srcPort, Location location, String peerId, double speed) {
+    public void onGetPeripheralUserLocation(int locationUpdateCount, String srcIP, int srcPort, Location location, String peerId, String position) {
 
        //自分が保持している周りのユーザ情報→ peripheralUsers　　　IPアドレスとポート番号が同じか確認
         for (int i = 0; i < peripheralUsers.size(); i++) {
@@ -182,7 +182,7 @@ public class P2P implements IP2PReceiver {
                 peripheralUsers.get(i).setLatitude(location.getLatitude());
                 peripheralUsers.get(i).setLongitude(location.getLongitude());
                 peripheralUsers.get(i).setPeerId(peerId);
-                peripheralUsers.get(i).setSpeed(speed);
+                peripheralUsers.get(i).setPosition(position);
                 sendAck(locationUpdateCount, srcIP, srcPort);
                 iP2P.onGetDetailUserInfo(peripheralUsers.get(i), peripheralUsers);
                 return;
@@ -192,7 +192,7 @@ public class P2P implements IP2PReceiver {
                 peripheralUsers.get(i).setLatitude(location.getLatitude());
                 peripheralUsers.get(i).setLongitude(location.getLongitude());
                 peripheralUsers.get(i).setPeerId(peerId);
-                peripheralUsers.get(i).setSpeed(speed);
+                peripheralUsers.get(i).setPosition(position);
                 sendAck(locationUpdateCount, srcIP, srcPort);
                 iP2P.onGetDetailUserInfo(peripheralUsers.get(i), peripheralUsers);
                 return;

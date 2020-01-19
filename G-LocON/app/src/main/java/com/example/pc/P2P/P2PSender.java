@@ -51,7 +51,7 @@ public class P2PSender extends AsyncTask<String, String, Integer> {
                 jsonObject.put("latitude", myUserInfo.getLatitude());
                 jsonObject.put("longitude",myUserInfo.getLongitude());
                 jsonObject.put("peerId", myUserInfo.getPeerId());
-                jsonObject.put("speed",myUserInfo.getSpeed());
+                jsonObject.put("position",myUserInfo.getPosition());
                 byte[] sendData = jsonObject.toString().getBytes();
 
                 //周辺端末全部に自分の位置情報を送るためfor文で回す
@@ -84,5 +84,6 @@ public class P2PSender extends AsyncTask<String, String, Integer> {
     @Override
     protected void onPostExecute(Integer a) {
         Log.d("P2P", "P2Psenderのsendはできた");
+
     }
 }

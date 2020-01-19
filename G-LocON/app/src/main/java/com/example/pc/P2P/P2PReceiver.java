@@ -69,7 +69,7 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
                     P2PJSONObject p2pJSONObject = new P2PJSONObject(jsonObject);
                         Log.d("Receive", "送信元:" + receivePacket.getAddress());
                         Location location = p2pJSONObject.getPeripheralUserLocation();
-                        iP2PReceiver.onGetPeripheralUserLocation(p2pJSONObject.getLocationCount(),receivePacket.getAddress().getHostAddress(),receivePacket.getPort(),location,p2pJSONObject.getPeerId(),p2pJSONObject.getSpeed());
+                        iP2PReceiver.onGetPeripheralUserLocation(p2pJSONObject.getLocationCount(),receivePacket.getAddress().getHostAddress(),receivePacket.getPort(),location,p2pJSONObject.getPeerId(),p2pJSONObject.getPosition());
 
                 }
 

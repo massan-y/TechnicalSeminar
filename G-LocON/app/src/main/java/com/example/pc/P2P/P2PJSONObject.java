@@ -43,13 +43,13 @@ public class P2PJSONObject {
 
 
 
-    public double getSpeed(){
-        double speed = 0;
+    public String getPosition(){
+        String position = null;
         try {
-            speed = jsonObject.getDouble("speed");
+            position = jsonObject.getString("position");
         }catch (Exception e){
         }
-        return speed;
+        return position;
     }
 
 

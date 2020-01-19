@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double nowSpeed = 0; //現在の速度
     private List<MarkerInfo> markerList;
     private Circle circle = null; //通信範囲
-    final static private double TOLERANCE_SPEED = 7; //速度差
+   // final static private double TOLERANCE_SPEED = 7; //速度差
     private float cameraLevel = 19.0f;
     final static private String HEAD_UP= "HEAD_UP";
     final static private String NORTH_UP= "NORTH_UP";
@@ -77,8 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DatagramSocket socket;
     final static int NAT_TRAVEL_OK = 1; //自身のNAT変換された情報を取得済の場合はOK
     private int natTravel = 0; //NAT_TRAVEL_OKに対応
-    final private static int USER_INFO_UPDATE_INTERVAL = 5; //シグナリングサーバに接続する頻度（位置情報を5回取得毎）
-    private int geoUpdateCount = 4; //USER_INFO_UPDATE_INTERVALに対応
+    final private static int USER_INFO_UPDATE_INTERVAL = 3; //シグナリングサーバに接続する頻度（位置情報を5回取得毎）
+    private int geoUpdateCount = 3; //USER_INFO_UPDATE_INTERVALに対応
     private int totalGeoUpdateCount = 0; //位置情報の更新回数
     private static double searchRange = 40; //m単位 これが検索範囲になっている
     private int addMarker = 0;
@@ -92,9 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static String japPosition; //positionの日本語を記憶する変数
     private static boolean search = false; // 異なるpositionを表示するか判断する変数 trueのときは表示する
     private Button searchButton;// ハンターのときのみ使用
-    private TextView countDown;// ３分間のカウントダウンを表示する
+    private TextView countDown;// カウントダウンを表示する
     private SimpleDateFormat dataFormat = new SimpleDateFormat("mm:ss", Locale.US); //カウントダウンに使用
     private  CountDownTimer cdt;
+
 
 
     @Override
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               }
               else japPosition = "逃走者";
 
-              Log.d("position",japPosition);
+              Log.d("P2P",japPosition);
 
               utilCommon.setSignalingServerIP("220.108.194.125"); //serverIPアドレス
               utilCommon.setSignalingServerPort(45555); //serverPort番号
@@ -173,7 +174,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               if(position.equals("hunter")){
                   searchButton.setVisibility(View.VISIBLE);
                   searchButton.setOnClickListener(this);
-                  cdt = new CountDownTimer(180000,100) {
+                  // TODO:時間の修正
+                  cdt = new CountDownTimer(18000,100) {
                       @Override
                       public void onTick(long millisUntilFinished) {
                           countDown.setText(dataFormat.format(millisUntilFinished));
@@ -184,9 +186,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                           countDown.setVisibility(View.INVISIBLE);
                           searchButton.setVisibility(View.VISIBLE);
                           search = false;
+                          /*
+                          myUserInfo.setPosition("hunter");
+                          Log.d("position",position);
+                          p2p.signalingRegister();
+                          */
+
                       }
                   };
               }
+              else  search = true;
 
               plus.setOnClickListener(this);
               minus.setOnClickListener(this);
@@ -198,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
               //アラートダイアログの設定
               AlertDialog.Builder builder = new AlertDialog.Builder(this);
-              builder.setTitle("確認事項1");
+              builder.setTitle("チュートリアル１");
               builder.setMessage(peerId+"さん\n"+"あなたは"+japPosition+"です");
               builder.setPositiveButton("next", new DialogInterface.OnClickListener() {
                   @Override
@@ -206,11 +215,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                       //2ページ目を表示　　もしかしたらもっとうまいやり方があるかもしれない
                       AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                      builder.setTitle("確認事項2");
+                      builder.setTitle("チュートリアル２");
                       if(position.equals("hunter"))
-                          builder.setMessage(searchRange+"m以内にいる逃走者が緑色のマーカーで表示されます。\n");
+                          builder.setMessage("\n" + searchRange + "m以内にいるハンターが赤色のマーカーで表示されます。\n");
                       else
-                          builder.setMessage(searchRange+"m以内にいる逃走者が緑色," +
+                          builder.setMessage("\n" + searchRange + "m以内にいる逃走者が緑色," +
                                   "ハンターが赤色のマーカーで表示されます。\n");
 
                       builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -264,11 +273,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         else if (R.id.plus == v.getId()) {
-            cameraLevel = cameraLevel + 1f;
+            cameraLevel = cameraLevel + 0.5f;
         }
 
         else if (R.id.minus == v.getId()) {
-            cameraLevel = cameraLevel - 1f;
+            cameraLevel = cameraLevel - 0.5f;
         }
 
         else if (R.id.angle == v.getId()) {
@@ -283,7 +292,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         else if (R.id.search == v.getId()){
-                search = true;
+               // myUserInfo.setPosition("fugitive");
+             search = true;
+             p2p.signalingSearch(searchRange);
                 searchButton.setVisibility(View.INVISIBLE);
                 countDown.setVisibility(View.VISIBLE);
                 cdt.start();
@@ -305,8 +316,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         myUserInfo.setPrivateIP(GetPrivateIP());
         myUserInfo.setPrivatePort(socket.getLocalPort());
         myUserInfo.setPeerId(utilCommon.getPeerId());
-        myUserInfo.setSpeed(nowSpeed);
-        //myUserInfo.setPeerId(utilCommon.getPeerId());
+        myUserInfo.setPosition(position);
+        myUserInfo.setPeerId(utilCommon.getPeerId());
 
         p2p = new P2P(socket, myUserInfo, this);
         natTravel = NAT_TRAVEL_OK;
@@ -351,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
 
-                String msg = "name:"+tapPeer.getPeerId()+"\nlatitude:"+tapPeer.getLatitude()+"\nlongitude:"+tapPeer.getLongitude()+"\nspeed:"+tapPeer.getSpeed();
+                String msg = "name:"+tapPeer.getPeerId()+"\nlatitude:"+tapPeer.getLatitude()+"\nlongitude:"+tapPeer.getLongitude();
                 displayToast(msg);
 
 
@@ -372,18 +383,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onLocationChanged(Location geo) {
         double nowAngle = new HeadUp(mLocation.getLatitude(), mLocation.getLongitude(), geo.getLatitude(), geo.getLongitude()).getNowAngle();
-        //m/sをkm/hに変換
-        nowSpeed = (new HubenyDistance().calcDistance(mLocation.getLatitude(), mLocation.getLongitude(), geo.getLatitude(), geo.getLongitude())) * 3.6;
-        Log.d("log", "angle:" + nowAngle);
-        Log.d("log", "speed:" + nowSpeed);
+
+        Log.v("Location","onLocationChanged()");
         mLocation = geo;
         //画面の切り替え
         cameraPosition(nowAngle);
 
-        //自分の位置情報、移動経路、スピードを設定
+        //自分の位置情報、移動経路
         myUserInfo.setLatitude(geo.getLatitude());
         myUserInfo.setLongitude(geo.getLongitude());
-        myUserInfo.setSpeed(nowSpeed);
+
 
 
         if (natTravel == NAT_TRAVEL_OK) {
@@ -392,12 +401,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             totalGeoUpdateCount++;//5回やると送信のやつを2つの変数で判断
             geoUpdateCount++;
 
+            geoUpdateCount = 0;
+            p2p.signalingUpdate();//アップデート
+            p2p.signalingSearch(searchRange);//検索
+            p2p.sendLocation(totalGeoUpdateCount);//送信位置情報
             //送信処理　5回やるごとに送って変数を初期化
             if (geoUpdateCount == USER_INFO_UPDATE_INTERVAL) {
-                geoUpdateCount = 0;
-                p2p.signalingUpdate();//アップデート
-                p2p.signalingSearch(searchRange);//検索
-                p2p.sendLocation(totalGeoUpdateCount);//送信位置情報
+
             } else {
                 p2p.sendLocation(totalGeoUpdateCount);
             }
@@ -486,6 +496,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     synchronized public void arrangeMarker(final UserInfo userInfo, final ArrayList<UserInfo> peripheralUserInfos) {
         //周りの情報のマーカーの設定をしている
+        Log.v("P2P","現在のsearch:" + search);
         /************************************************マーカの削除************************************************/
         if (userInfo == null) {
             Log.d("Main_arrangeMarker", "マーカの削除を行う関数が呼ばれたときのマーカ数：" + markerList.size());
@@ -537,42 +548,138 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("Main_arrangeMarker", "マーカ移動を行う時のマーカ数" + markerList.size());
         waitUntilFinishAddMarker(); //markerが他スレッドで作成中の場合は終了を待つ
         /////////////////////////////////////////////マーカの更新の実行/////////////////////////////////////////////
-        for (int i = 0; i < markerList.size(); i++) {
-            final int tmp = i;
-            if (markerList.get(i).getPeerId().equals(userInfo.getPeerId())) {
-                //既定値よりも速度が早い場合は赤色のマーカーを設置
-                if (userInfo.getSpeed() - myUserInfo.getSpeed() > TOLERANCE_SPEED) {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
-                            markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                        }
-                    });
-                    //既定値以内の差であるときは緑のマーカーを設置
-                } else {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
-                            markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                        }
-                    });
+        Log.d("UPDATE","マーカ作成、更新直前のsearch" + search);
+        switch (position){
+            case "hunter":
+                for(int i = 0; i < markerList.size(); i++){
+                   final int tmp = i;
+                   if (markerList.get(i).getPeerId().equals(userInfo.getPeerId())){
+                       // ハンターのピアだったときは赤のマーカを追加
+                       if(userInfo.getPosition().equals("hunter")){
+                           runOnUiThread(new Runnable() {
+                               public void run() {
+                                   markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
+                                   markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                               }
+                           });
+                       }
+                       // 逃走者のピアの時
+                       else{
+                           // searchがtrueのときは逃走者を緑のマーカで追加
+                           if (search){
+                               runOnUiThread(new Runnable() {
+                                   public void run() {
+                                       markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
+                                       markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                                   }
+                               });
+                               //search = false;
+                           }
+                           else{
+                               // searchがfalseのときマーカを削除する
+                               runOnUiThread(new Runnable() {
+                                   public void run() {
+                                       markerList.get(tmp).getMarker().remove();
+                                   }
+                               });
+                           }
+                       }
+                       return;
+                   }
                 }
-                return;
-            }
+                break;
+
+
+            case "fugitive":
+                for (int i = 0; i < markerList.size(); i++){
+                    final int tmp = i;
+                    if (markerList.get(i).getPeerId().equals(userInfo.getPeerId())){
+                        // 逃走者のピアだったときは緑のマーカを追加
+                        if (userInfo.getPosition().equals("fugitive")){
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
+                                    markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                                }
+                            });
+                        }
+                        else{
+                            // searchがtrueのときはハンターを赤のマーカで追加
+                            if (search){
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
+                                        markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                                    }
+                                });
+                                //search = false;
+                            }
+                        }
+                        return;
+                    }
+                }
+                break;
         }
         /////////////////////////////////////////////マーカの更新の実行/////////////////////////////////////////////
 
 
         /////////////////////////////////////////////マーカの作成の実行/////////////////////////////////////////////
         addMarker = ADD_MARKER_PROGRESS;
-        runOnUiThread(new Runnable() {
-            public void run() {
-                Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                String setPeerId = userInfo.getPeerId();
-                markerList.add(new MarkerInfo(setMarker, setPeerId));
-                addMarker = NOT_ADD_MARKER_PROGRESS;
-            }
-        });
+        Log.v("position",userInfo.getPosition());
+        switch (position){
+
+            // 自身がハンターのとき
+            case "hunter":
+                if (userInfo.getPosition().equals("hunter")){
+
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                            String setPeerId = userInfo.getPeerId();
+                            markerList.add(new MarkerInfo(setMarker, setPeerId));
+                            addMarker = NOT_ADD_MARKER_PROGRESS;
+                        }
+                    });
+                }
+                else{
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            if (search){
+                            Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            String setPeerId = userInfo.getPeerId();
+                            markerList.add(new MarkerInfo(setMarker, setPeerId));
+                            addMarker = NOT_ADD_MARKER_PROGRESS;
+                        }}
+                    });
+                }
+
+                break;
+
+            // 逃走者のとき
+            case "fugitive":
+                if (userInfo.getPosition().equals("fugitive")){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            String setPeerId = userInfo.getPeerId();
+                            markerList.add(new MarkerInfo(setMarker, setPeerId));
+                            addMarker = NOT_ADD_MARKER_PROGRESS;
+                        }
+                    });
+                }
+                else{
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            if (search){
+                                Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                                String setPeerId = userInfo.getPeerId();
+                                markerList.add(new MarkerInfo(setMarker, setPeerId));
+                                addMarker = NOT_ADD_MARKER_PROGRESS;
+                            }}
+                    });
+                }
+                break;
+        }
         /////////////////////////////////////////////マーカの作成の実行/////////////////////////////////////////////
     }
 

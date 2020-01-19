@@ -12,7 +12,7 @@ public class UserInfo {
     private double latitude;
     private double longitude;
     private String peerId;
-    private double speed;
+    private String position;
 
     public UserInfo(){
 
@@ -47,8 +47,8 @@ public class UserInfo {
         return peerId;
     }
 
-    public double getSpeed() {
-        return speed;
+    public String getPosition(){
+        return position;
     }
 
     public void setPublicIP(String publicIP) {
@@ -79,8 +79,7 @@ public class UserInfo {
         this.peerId = peerId;
     }
 
-    public void setSpeed(double speed) {
-        this.speed = speed;
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
-
