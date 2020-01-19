@@ -3,14 +3,19 @@ package com.example.pc.main;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pc.P2P.IP2P;
@@ -37,6 +42,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -46,6 +52,7 @@ import java.util.List;
 /**
  * v2vの基本形
  */
+@RequiresApi(api = Build.VERSION_CODES.N)
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener, OnMapReadyCallback, ISTUNServerClient, IP2P {
     private String peerId;
     private Button end;
@@ -78,9 +85,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     final private int ADD_MARKER_PROGRESS = 1;
     final private int NOT_ADD_MARKER_PROGRESS = 0;
     private P2P p2p;
+
+    // 以下逃走中実装のために追加した変数
     private static final int InputActivity = 100;
     private static String position; //逃走者かハンターかを記憶する変数
     private static String japPosition; //positionの日本語を記憶する変数
+    private static boolean search = false; // 異なるpositionを表示するか判断する変数 trueのときは表示する
+    private Button searchButton;// ハンターのときのみ使用
+    private TextView countDown;// ３分間のカウントダウンを表示する
+    private SimpleDateFormat dataFormat = new SimpleDateFormat("mm:ss", Locale.US); //カウントダウンに使用
+    private  CountDownTimer cdt;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +113,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         angle = (Button)findViewById(R.id.angle);
         end.setOnClickListener(this);
         end.setVisibility(View.INVISIBLE);
+
+        // 以下の変数は逃走中で追加
+        searchButton = findViewById(R.id.search);
+        countDown = findViewById(R.id.countDown);
+        searchButton.setVisibility(View.INVISIBLE);
+        countDown.setVisibility(View.INVISIBLE);
 
         createDatagramSocket();
         utilCommon = (UtilCommon) getApplication();
@@ -118,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * InputActivityから返ってきたデータを受け取る
      * InputActivityから帰ってきたときに諸々の設定を行う
      * G-LockONでのスタートボタンの機能を兼ねている
+     *
      */
 
     @Override
@@ -146,6 +168,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               utilCommon.setStunServerPort(45554); //serverPort番号
               utilCommon.setPeerId(peerId);
               end.setVisibility(View.VISIBLE);
+
+              //　ハンターのときはサーチボタンに関する設定を行う
+              if(position.equals("hunter")){
+                  searchButton.setVisibility(View.VISIBLE);
+                  searchButton.setOnClickListener(this);
+                  cdt = new CountDownTimer(180000,100) {
+                      @Override
+                      public void onTick(long millisUntilFinished) {
+                          countDown.setText(dataFormat.format(millisUntilFinished));
+                      }
+
+                      @Override
+                      public void onFinish() {
+                          countDown.setVisibility(View.INVISIBLE);
+                          searchButton.setVisibility(View.VISIBLE);
+                          search = false;
+                      }
+                  };
+              }
 
               plus.setOnClickListener(this);
               minus.setOnClickListener(this);
@@ -240,6 +281,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 angle.setText("HEADUP");
             }
         }
+
+        else if (R.id.search == v.getId()){
+                search = true;
+                searchButton.setVisibility(View.INVISIBLE);
+                countDown.setVisibility(View.VISIBLE);
+                cdt.start();
+         }
     }
 
 
