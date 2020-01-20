@@ -27,6 +27,8 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
         this.iP2PReceiver = iP2PReceiver;
     }
 
+
+
     @Override
     protected Void doInBackground(String... text) {
         Log.d("Receive", "Recieveクラスまで来た");
@@ -36,6 +38,8 @@ public class P2PReceiver extends AsyncTask<String, String, Void> {
         final String SEND_DATA = "SendLocation";
         final String ACK = "Ack";
         DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+
 
         do {
                 Log.d("P2P", "P2Pレシーブ起動直前");

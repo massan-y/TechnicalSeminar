@@ -62,10 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private GoogleMap mMap;
     private Location mLocation; //現在の位置情報
     private float nowCameraAngle = 0; //現在のカメラアングル
-    private double nowSpeed = 0; //現在の速度
     private List<MarkerInfo> markerList;
     private Circle circle = null; //通信範囲
-   // final static private double TOLERANCE_SPEED = 7; //速度差
     private float cameraLevel = 19.0f;
     final static private String HEAD_UP= "HEAD_UP";
     final static private String NORTH_UP= "NORTH_UP";
@@ -77,10 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private DatagramSocket socket;
     final static int NAT_TRAVEL_OK = 1; //自身のNAT変換された情報を取得済の場合はOK
     private int natTravel = 0; //NAT_TRAVEL_OKに対応
-    final private static int USER_INFO_UPDATE_INTERVAL = 3; //シグナリングサーバに接続する頻度（位置情報を5回取得毎）
-    private int geoUpdateCount = 3; //USER_INFO_UPDATE_INTERVALに対応
     private int totalGeoUpdateCount = 0; //位置情報の更新回数
-    private static double searchRange = 40; //m単位 これが検索範囲になっている
+    private static double searchRange = 60; //m単位 これが検索範囲になっている
     private int addMarker = 0;
     final private int ADD_MARKER_PROGRESS = 1;
     final private int NOT_ADD_MARKER_PROGRESS = 0;
@@ -94,7 +90,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button searchButton;// ハンターのときのみ使用
     private TextView countDown;// カウントダウンを表示する
     private SimpleDateFormat dataFormat = new SimpleDateFormat("mm:ss", Locale.US); //カウントダウンに使用
-    private  CountDownTimer cdt;
+    private CountDownTimer cdt;
+    private CountDownTimer interval;
+    private TextView intervalCount;
+    private boolean count = false;
+
 
 
 
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
               utilCommon.setPeerId(peerId);
               end.setVisibility(View.VISIBLE);
 
-              //　ハンターのときはサーチボタンに関する設定を行う
-              if(position.equals("hunter")){
+              //　逃走者のときはサーチボタンに関する設定を行う
+              if(position.equals("fugitive")){
                   searchButton.setVisibility(View.VISIBLE);
                   searchButton.setOnClickListener(this);
                   // TODO:時間の修正
@@ -184,16 +184,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                       @Override
                       public void onFinish() {
                           countDown.setVisibility(View.INVISIBLE);
-                          searchButton.setVisibility(View.VISIBLE);
+                          intervalCount.setVisibility(View.VISIBLE);
                           search = false;
-                          /*
-                          myUserInfo.setPosition("hunter");
-                          Log.d("position",position);
-                          p2p.signalingRegister();
-                          */
+                          count = true;
+                          interval.start();
 
                       }
                   };
+                  // インターバルの設定
+                  interval = new CountDownTimer(1800,100) {
+                      @Override
+                      public void onTick(long millisUntilFinished) {
+                          intervalCount.setText(dataFormat.format(millisUntilFinished));
+                      }
+
+                      @Override
+                      public void onFinish() {
+                          searchButton.setVisibility(View.VISIBLE);
+                          intervalCount.setVisibility(View.INVISIBLE);
+
+                      }
+                  };
+                  intervalCount = findViewById(R.id.intervalCount);
               }
               else  search = true;
 
@@ -216,19 +228,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                       //2ページ目を表示　　もしかしたらもっとうまいやり方があるかもしれない
                       AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                       builder.setTitle("チュートリアル２");
-                      if(position.equals("hunter"))
-                          builder.setMessage("\n" + searchRange + "m以内にいるハンターが赤色のマーカーで表示されます。\n");
-                      else
+                      if(position.equals("hunter")){
+                          builder.setMessage("\n" + searchRange + "m以内にいるハンターが赤色、逃走者が緑色のマーカーで表示されます。\n");
+                          builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                              @Override
+                              public void onClick(DialogInterface dialog, int which) {
+
+                              }
+                          });
+                          builder.show();
+                      }
+
+                      else{
                           builder.setMessage("\n" + searchRange + "m以内にいる逃走者が緑色," +
                                   "ハンターが赤色のマーカーで表示されます。\n");
+                          builder.setPositiveButton("NEXT", new DialogInterface.OnClickListener() {
+                              @Override
+                              public void onClick(DialogInterface dialog, int which) {
+                                  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                  builder.setTitle("チュートリアル３");
+                                  builder.setMessage("\n右上の検索ボタンを押すことで１分間ハンターの位置も表示することができます。\n" +
+                                          "ボタンは３分後に再び使用できます。");
+                                  builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                      @Override
+                                      public void onClick(DialogInterface dialog, int which) {
 
-                      builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                          @Override
-                          public void onClick(DialogInterface dialog, int which) {
+                                      }
+                                  });
+                                  builder.show();
 
-                          }
-                      });
-                      builder.show();
+                              }
+                          });
+                          builder.show();
+                      }
+
                   }
               });
               builder.show();
@@ -292,12 +325,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         else if (R.id.search == v.getId()){
-               // myUserInfo.setPosition("fugitive");
+
              search = true;
-             p2p.signalingSearch(searchRange);
-                searchButton.setVisibility(View.INVISIBLE);
-                countDown.setVisibility(View.VISIBLE);
-                cdt.start();
+             p2p.signalingUpdate();//アップデート
+             p2p.signalingSearch(searchRange);//検索
+             p2p.sendLocation(totalGeoUpdateCount);//送信位置情報
+             searchButton.setVisibility(View.INVISIBLE);
+             countDown.setVisibility(View.VISIBLE);
+             cdt.start();
          }
     }
 
@@ -399,18 +434,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //自分の情報を渡す
             p2p.setMyUserInfo(myUserInfo);
             totalGeoUpdateCount++;//5回やると送信のやつを2つの変数で判断
-            geoUpdateCount++;
 
-            geoUpdateCount = 0;
+            Log.v("現在のsearch","sendLocation前");
             p2p.signalingUpdate();//アップデート
             p2p.signalingSearch(searchRange);//検索
             p2p.sendLocation(totalGeoUpdateCount);//送信位置情報
-            //送信処理　5回やるごとに送って変数を初期化
-            if (geoUpdateCount == USER_INFO_UPDATE_INTERVAL) {
 
-            } else {
-                p2p.sendLocation(totalGeoUpdateCount);
-            }
         }
     }
 
@@ -496,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     synchronized public void arrangeMarker(final UserInfo userInfo, final ArrayList<UserInfo> peripheralUserInfos) {
         //周りの情報のマーカーの設定をしている
-        Log.v("P2P","現在のsearch:" + search);
+
         /************************************************マーカの削除************************************************/
         if (userInfo == null) {
             Log.d("Main_arrangeMarker", "マーカの削除を行う関数が呼ばれたときのマーカ数：" + markerList.size());
@@ -543,7 +572,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         /************************************************マーカの削除************************************************/
 
-
+        Log.v("P2P","現在のsearch:" + search
+                + "\nuserInfo  " + userInfo);
         /************************************************マーカの作成・更新************************************************/
         Log.d("Main_arrangeMarker", "マーカ移動を行う時のマーカ数" + markerList.size());
         waitUntilFinishAddMarker(); //markerが他スレッドで作成中の場合は終了を待つ
@@ -575,14 +605,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                });
                                //search = false;
                            }
-                           else{
-                               // searchがfalseのときマーカを削除する
-                               runOnUiThread(new Runnable() {
-                                   public void run() {
-                                       markerList.get(tmp).getMarker().remove();
-                                   }
-                               });
-                           }
                        }
                        return;
                    }
@@ -610,9 +632,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     public void run() {
                                         markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
                                         markerList.get(tmp).getMarker().setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                                        markerList.get(tmp).getMarker().setVisible(true);
                                     }
                                 });
-                                //search = false;
+                            }
+                            // elseのときはマーカを非表示にする
+                            else {
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        markerList.get(tmp).getMarker().setPosition(new LatLng(userInfo.getLatitude(), userInfo.getLongitude()));
+                                        markerList.get(tmp).getMarker().setVisible(false);
+                                    }
+                                });
                             }
                         }
                         return;
@@ -670,12 +701,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else{
                     runOnUiThread(new Runnable() {
                         public void run() {
-                            if (search){
-                                Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                                String setPeerId = userInfo.getPeerId();
-                                markerList.add(new MarkerInfo(setMarker, setPeerId));
-                                addMarker = NOT_ADD_MARKER_PROGRESS;
-                            }}
+                            Marker setMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(userInfo.getLatitude(), userInfo.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                            String setPeerId = userInfo.getPeerId();
+                            if(!search)
+                                setMarker.setVisible(false);
+                            markerList.add(new MarkerInfo(setMarker, setPeerId));
+                            addMarker = NOT_ADD_MARKER_PROGRESS;
+
+                            }
                     });
                 }
                 break;
