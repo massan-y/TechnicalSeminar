@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                   searchButton.setVisibility(View.VISIBLE);
                   searchButton.setOnClickListener(this);
                   // TODO:時間の修正
-                  cdt = new CountDownTimer(18000,100) {
+                  cdt = new CountDownTimer(10000,100) {
                       @Override
                       public void onTick(long millisUntilFinished) {
                           countDown.setText(dataFormat.format(millisUntilFinished));
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                       }
                   };
                   // インターバルの設定
-                  interval = new CountDownTimer(1800,100) {
+                  interval = new CountDownTimer(5000,100) {
                       @Override
                       public void onTick(long millisUntilFinished) {
                           intervalCount.setText(dataFormat.format(millisUntilFinished));
